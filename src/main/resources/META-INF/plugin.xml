@@ -1,0 +1,61 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>com.wheelseye.controllercleanup</id>
+
+    <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
+    <name>Controller Cleanup</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor email="saurabh.gautam@wheelseye.com" url="https://www.wheelseye.com">WheelsEye</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+    <description><![CDATA[
+    Removes unused deprecated methods from Spring controllers and cleans up unused code.
+    
+    This plugin analyzes your Spring controllers and identifies deprecated methods that are no longer used.
+    It also provides comprehensive code cleanup by removing unused imports and unused final private fields.
+    
+    Features:
+    - Finds deprecated methods in Spring controllers
+    - Analyzes usage across the entire project
+    - Safely removes unused deprecated methods
+    - Removes unused imports
+    - Removes unused final private fields
+    - Shows detailed summary of changes
+    ]]></description>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <projectService serviceImplementation="com.github.ayushsinghal05.deprecatedcontrollerremover.services.MyProjectService"/>
+        <postStartupActivity implementation="com.github.ayushsinghal05.deprecatedcontrollerremover.startup.MyProjectActivity"/>
+        <toolWindow id="Custom" secondary="true" icon="AllIcons.General.Modified" anchor="right"
+                    factoryClass="com.github.ayushsinghal05.deprecatedcontrollerremover.toolWindow.MyToolWindowFactory"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action id="ControllerCleanup" class="com.wheelseye.controllercleanup.action.ControllerCleanupAction" text="Controller Cleanup" description="Remove unused deprecated methods from Spring controllers">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+        
+
+        
+        <!-- Disabled standalone code cleanup action -->
+        <!--
+        <action id="CodeCleanup" class="com.wheelseye.codecleanup.action.CodeCleanupAction" text="Clean Unused Code" description="Remove unused imports and final private fields">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+        -->
+    </actions>
+</idea-plugin>
