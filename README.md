@@ -1,15 +1,15 @@
-# DeprecatedControllerRemover
+# Controller Cleanup
 
 
 
 > [!NOTE]
-> An IntelliJ IDEA plugin for automatically detecting and removing deprecated controllers and unused code.
+> An IntelliJ IDEA plugin for automatically detecting and removing deprecated controller methods and unused code.
 
 <!-- Plugin description -->
-**DeprecatedControllerRemover** is an IntelliJ plugin that intelligently analyzes your Java/Spring codebase to identify and safely remove deprecated controllers and unused code elements.
+**Controller Cleanup** is an IntelliJ plugin that intelligently analyzes your Java/Spring codebase to identify and safely remove deprecated controller methods and unused code elements.
 
 This plugin helps maintain clean, efficient codebases by:
-- **Detecting deprecated controllers** that are no longer in use
+- **Detecting deprecated controller methods** that are no longer in use
 - **Removing unused final private fields** to reduce memory footprint
 - **Cleaning up unused imports** to improve code readability
 - **Providing detailed analysis reports** of all cleanup operations
@@ -18,9 +18,9 @@ This plugin helps maintain clean, efficient codebases by:
 ## Key Features
 
 ### 🎯 **Controller Cleanup**
-- Identifies deprecated Spring controllers with `@Controller` and `@RestController` annotations
+- Identifies deprecated methods in Spring controllers with `@Controller` and `@RestController` annotations
 - Analyzes usage patterns across the entire project using PSI tree traversal
-- Safely removes controllers that are no longer referenced
+- Safely removes unused deprecated methods from controllers
 - Provides detailed reporting of what was removed
 
 ### 🧹 **Code Cleanup Service**
@@ -44,7 +44,7 @@ This plugin helps maintain clean, efficient codebases by:
 ## Installation
 
 ### From Source (Recommended for Development)
-1. Clone the repository: `git clone https://github.com/Ayushsinghal05/DeprecatedControllerRemover.git`
+1. Clone the repository: `git clone https://github.com/Ayushsinghal05/controller-cleanup-starter.git`
 2. Build the plugin: `./gradlew buildPlugin`
 3. Install the generated `.jar` file from `build/distributions/` in IntelliJ IDEA
 4. Restart your IDE
@@ -52,7 +52,7 @@ This plugin helps maintain clean, efficient codebases by:
 ### From JetBrains Marketplace (Coming Soon)
 1. Open IntelliJ IDEA
 2. Go to **Settings/Preferences > Plugins**
-3. Search for "DeprecatedControllerRemover"
+3. Search for "Controller Cleanup"
 4. Click **Install** and restart your IDE
 
 ## Usage
@@ -103,10 +103,10 @@ This plugin is built using the IntelliJ Platform SDK and follows best practices 
 
 ```bash
 # Clone the repository
-git clone https://github.com/Ayushsinghal05/DeprecatedControllerRemover.git
+git clone https://github.com/Ayushsinghal05/controller-cleanup-starter.git
 
 # Navigate to the project directory
-cd DeprecatedControllerRemover
+cd controller-cleanup-starter
 
 # Build the plugin
 ./gradlew buildPlugin
@@ -122,16 +122,22 @@ cd DeprecatedControllerRemover
 
 ```
 src/main/kotlin/
-├── com/wheelseye/
-│   ├── codecleanup/
-│   │   └── service/
-│   │       └── CodeCleanupService.kt      # Core cleanup logic
-│   └── controllercleanup/
-│       ├── action/
-│       │   └── ControllerCleanupAction.kt # UI actions
-│       ├── service/
-│       │   └── ControllerCleanupService.kt # Controller-specific logic
-│       └── ControllerCleanupStartupActivity.kt
+├── com/github/ayushsinghal05/deprecatedcontrollerremover/
+│   ├── services/
+│   │   └── MyProjectService.kt            # Project service for sample functionality
+│   ├── startup/
+│   │   └── MyProjectActivity.kt           # Startup activity for sample functionality
+│   └── toolWindow/
+│       └── MyToolWindowFactory.kt         # Tool window factory for sample UI
+└── com/wheelseye/
+    ├── codecleanup/
+    │   └── service/
+    │       └── CodeCleanupService.kt      # Core cleanup logic for unused imports and fields
+    └── controllercleanup/
+        ├── action/
+        │   └── ControllerCleanupAction.kt # UI actions for controller cleanup
+        └── service/
+            └── ControllerCleanupService.kt # Controller-specific cleanup logic
 ```
 
 ## How It Works
@@ -150,9 +156,9 @@ The plugin uses IntelliJ's PSI (Program Structure Interface) to analyze your cod
 For Spring controllers, the plugin:
 
 - Identifies classes with `@Controller` or `@RestController` annotations using AnnotatedElementsSearch
-- Checks for `@Deprecated` annotations on methods
-- Analyzes usage patterns across the entire project
-- Validates that no active endpoints reference the controller methods
+- Checks for `@Deprecated` annotations on methods within these controllers
+- Analyzes usage patterns across the entire project to find unused deprecated methods
+- Validates that no active code references the deprecated methods
 - Provides detailed reporting before removal
 
 ### Field Cleanup
@@ -230,9 +236,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- **Issues**: Report bugs and request features on [GitHub Issues](https://github.com/Ayushsinghal05/DeprecatedControllerRemover/issues)
-- **Discussions**: Join the conversation on [GitHub Discussions](https://github.com/Ayushsinghal05/DeprecatedControllerRemover/discussions)
-- **Documentation**: Check our [Wiki](https://github.com/Ayushsinghal05/DeprecatedControllerRemover/wiki) for detailed guides
+- **Issues**: Report bugs and request features on [GitHub Issues](https://github.com/Ayushsinghal05/controller-cleanup-starter/issues)
+- **Discussions**: Join the conversation on [GitHub Discussions](https://github.com/Ayushsinghal05/controller-cleanup-starter/discussions)
+- **Documentation**: Check our [Wiki](https://github.com/Ayushsinghal05/controller-cleanup-starter/wiki) for detailed guides
 
 ## Roadmap
 

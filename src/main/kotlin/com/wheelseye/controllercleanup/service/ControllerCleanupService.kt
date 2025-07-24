@@ -298,10 +298,6 @@ class ControllerCleanupService(private val project: Project) {
         return calledMethods.toList()
     }
 
-    private fun getAffectedFiles(unusedMethods: List<PsiMethod>): Set<PsiFile> {
-        return unusedMethods.mapNotNull { it.containingFile }.toSet()
-    }
-
     private fun showMessage(message: String) {
         println("Controller Cleanup: $message")
     }
