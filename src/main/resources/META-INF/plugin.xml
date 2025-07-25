@@ -33,16 +33,6 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
 
-    <!-- Extension points defined by the plugin.
-         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
-    <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
-        <projectService serviceImplementation="com.github.ayushsinghal05.deprecatedcontrollerremover.services.MyProjectService"/>
-        <postStartupActivity implementation="com.github.ayushsinghal05.deprecatedcontrollerremover.startup.MyProjectActivity"/>
-        <toolWindow id="Custom" secondary="true" icon="AllIcons.General.Modified" anchor="right"
-                    factoryClass="com.github.ayushsinghal05.deprecatedcontrollerremover.toolWindow.MyToolWindowFactory"/>
-    </extensions>
-
     <actions>
         <!-- Add your actions here -->
         <action id="ControllerCleanup" class="com.wheelseye.controllercleanup.action.ControllerCleanupAction" text="Controller Cleanup" description="Remove unused deprecated methods from Spring controllers">
