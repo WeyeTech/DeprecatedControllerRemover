@@ -198,7 +198,7 @@ cd DeprecatedControllerRemover
     </action>
     <!-- Disabled standalone code cleanup action -->
     <!--
-        <action id="CodeCleanup" class="com.wheelseye.codecleanup.action.CodeCleanupAction" text="Clean Unused Code" description="Remove unused imports and final private fields">
+        <action id="CleanMarkedFiles" class="com.wheelseye.codecleanup.action.CodeCleanupAction" text="Clean Unused Code" description="Remove unused imports and final private fields">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
         -->

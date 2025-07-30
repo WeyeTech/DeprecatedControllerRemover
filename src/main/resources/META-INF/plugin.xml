@@ -52,7 +52,7 @@
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
         
-        <action id="CodeCleanup" class="com.wheelseye.codecleanup.action.CodeCleanupAction" text="Clean Marked Files" description="Remove unused imports and final private fields from files marked with '//Controller Cleaner'">
+        <action id="CleanMarkedFiles" class="com.wheelseye.codecleanup.action.CodeCleanupAction" text="Clean Marked Files" description="Remove unused imports and final private fields from files marked with '//Controller Cleaner'">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
         
@@ -60,7 +60,7 @@
         
         <!-- Disabled standalone code cleanup action -->
         <!--
-        <action id="CodeCleanup" class="com.wheelseye.codecleanup.action.CodeCleanupAction" text="Clean Unused Code" description="Remove unused imports and final private fields">
+        <action id="CleanMarkedFiles" class="com.wheelseye.codecleanup.action.CodeCleanupAction" text="Clean Unused Code" description="Remove unused imports and final private fields">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
         -->
