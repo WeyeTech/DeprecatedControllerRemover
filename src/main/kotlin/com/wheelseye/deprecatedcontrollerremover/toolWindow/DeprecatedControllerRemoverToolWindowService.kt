@@ -1,42 +1,44 @@
 package com.wheelseye.deprecatedcontrollerremover.toolWindow
 
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.startup.StartupActivity
+import com.intellij.openapi.wm.ToolWindow
+import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.ui.content.ContentFactory
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.Service
 
-@Service(Service.Level.PROJECT)
-class DeprecatedControllerRemoverToolWindowService(private val project: Project) {
-    
-    fun showToolWindow() {
-        val toolWindowManager = ToolWindowManager.getInstance(project)
-        val toolWindow = toolWindowManager.getToolWindow("Deprecated Controller Remover")
-        toolWindow?.show()
-    }
-    
-    fun appendMessage(message: String) {
-        ApplicationManager.getApplication().invokeLater {
-            val toolWindowManager = ToolWindowManager.getInstance(project)
-            val toolWindow = toolWindowManager.getToolWindow("Deprecated Controller Remover")
-            val content = toolWindow?.contentManager?.selectedContent
-            val panel = content?.component as? DeprecatedControllerRemoverToolWindowPanel
-            panel?.appendMessage(message)
-        }
-    }
-    
-    fun clearMessages() {
-        ApplicationManager.getApplication().invokeLater {
-            val toolWindowManager = ToolWindowManager.getInstance(project)
-            val toolWindow = toolWindowManager.getToolWindow("Deprecated Controller Remover")
-            val content = toolWindow?.contentManager?.selectedContent
-            val panel = content?.component as? DeprecatedControllerRemoverToolWindowPanel
-            panel?.clearMessages()
-        }
-    }
+class DeprecatedControllerRemoverToolWindowService : StartupActivity.Background {
     
     companion object {
-        fun getInstance(project: Project): DeprecatedControllerRemoverToolWindowService {
-            return project.getService(DeprecatedControllerRemoverToolWindowService::class.java)
+        private const val TOOL_WINDOW_ID = "Deprecated Controller Remover"
+    }
+    
+    override fun runActivity(project: Project) {
+        // Register tool window on EDT
+        ApplicationManager.getApplication().invokeLater {
+            val toolWindowManager = ToolWindowManager.getInstance(project)
+            
+            // Register the tool window programmatically
+            val toolWindow = toolWindowManager.registerToolWindow(
+                TOOL_WINDOW_ID,
+                true,
+                ToolWindowAnchor.BOTTOM
+            )
+            
+            // Set tool window properties
+            toolWindow.setIcon(AllIcons.Actions.Refresh)
+            
+            // Set up the tool window content
+            setupToolWindowContent(project, toolWindow)
         }
+    }
+    
+    private fun setupToolWindowContent(project: Project, toolWindow: ToolWindow) {
+        val toolWindowPanel = DeprecatedControllerRemoverToolWindowPanel(project)
+        val contentFactory = ContentFactory.getInstance()
+        val content = contentFactory.createContent(toolWindowPanel, "", false)
+        toolWindow.contentManager.addContent(content)
     }
 } 

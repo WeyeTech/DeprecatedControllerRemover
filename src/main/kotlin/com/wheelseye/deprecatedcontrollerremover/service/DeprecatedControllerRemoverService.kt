@@ -24,7 +24,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.psi.PsiElementFactory
-import com.wheelseye.deprecatedcontrollerremover.toolWindow.DeprecatedControllerRemoverToolWindowService
+import com.wheelseye.deprecatedcontrollerremover.toolWindow.DeprecatedControllerRemoverToolWindowManager
 
 class DeprecatedControllerRemoverService(private val project: Project) {
 
@@ -36,7 +36,7 @@ class DeprecatedControllerRemoverService(private val project: Project) {
 
     fun performCleanup() {
         // Show tool window and clear previous messages
-        val toolWindowService = DeprecatedControllerRemoverToolWindowService.getInstance(project)
+        val toolWindowService = DeprecatedControllerRemoverToolWindowManager.getInstance(project)
         toolWindowService.showToolWindow()
         toolWindowService.clearMessages()
         toolWindowService.appendMessage("Starting Deprecated Controller Remover...")
@@ -403,7 +403,7 @@ class DeprecatedControllerRemoverService(private val project: Project) {
         println("Deprecated Controller Remover: $message")
         // Also send to tool window if available
         try {
-            val toolWindowService = DeprecatedControllerRemoverToolWindowService.getInstance(project)
+            val toolWindowService = DeprecatedControllerRemoverToolWindowManager.getInstance(project)
             toolWindowService.appendMessage(message)
         } catch (e: Exception) {
             // Tool window might not be available, ignore

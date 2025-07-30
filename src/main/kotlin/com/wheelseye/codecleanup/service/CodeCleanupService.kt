@@ -25,7 +25,7 @@ import com.intellij.psi.PsiClassObjectAccessExpression
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.ProgressIndicator
-import com.wheelseye.codecleanup.toolWindow.CodeCleanupToolWindowService
+import com.wheelseye.codecleanup.toolWindow.CodeCleanupToolWindowManager
 
 class CodeCleanupService(private val project: Project) {
 
@@ -41,7 +41,7 @@ class CodeCleanupService(private val project: Project) {
 
     fun performCleanup() {
         // Show tool window and clear previous messages
-        val toolWindowService = CodeCleanupToolWindowService.getInstance(project)
+        val toolWindowService = CodeCleanupToolWindowManager.getInstance(project)
         toolWindowService.showToolWindow()
         toolWindowService.clearMessages()
         toolWindowService.appendMessage("Starting Code Cleanup...")
@@ -502,7 +502,7 @@ class CodeCleanupService(private val project: Project) {
         println("Code Cleanup: $message")
         // Also send to tool window if available
         try {
-            val toolWindowService = CodeCleanupToolWindowService.getInstance(project)
+            val toolWindowService = CodeCleanupToolWindowManager.getInstance(project)
             toolWindowService.appendMessage(message)
         } catch (e: Exception) {
             // Tool window might not be available, ignore

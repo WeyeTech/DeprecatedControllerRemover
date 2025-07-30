@@ -34,16 +34,8 @@
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="Deprecated Controller Remover" 
-                   anchor="bottom" 
-                   secondary="false"
-                   icon="AllIcons.Actions.Clean" 
-                   factoryClass="com.wheelseye.deprecatedcontrollerremover.toolWindow.DeprecatedControllerRemoverToolWindowFactory"/>
-        <toolWindow id="Code Cleanup" 
-                   anchor="bottom" 
-                   secondary="true"
-                   icon="AllIcons.Actions.Clean" 
-                   factoryClass="com.wheelseye.codecleanup.toolWindow.CodeCleanupToolWindowFactory"/>
+        <postStartupActivity implementation="com.wheelseye.deprecatedcontrollerremover.toolWindow.DeprecatedControllerRemoverToolWindowService"/>
+        <postStartupActivity implementation="com.wheelseye.codecleanup.toolWindow.CodeCleanupToolWindowService"/>
     </extensions>
 
     <actions>

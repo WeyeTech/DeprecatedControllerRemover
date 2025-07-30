@@ -1,42 +1,44 @@
 package com.wheelseye.codecleanup.toolWindow
 
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.startup.StartupActivity
+import com.intellij.openapi.wm.ToolWindow
+import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.ui.content.ContentFactory
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.Service
 
-@Service(Service.Level.PROJECT)
-class CodeCleanupToolWindowService(private val project: Project) {
-    
-    fun showToolWindow() {
-        val toolWindowManager = ToolWindowManager.getInstance(project)
-        val toolWindow = toolWindowManager.getToolWindow("Code Cleanup")
-        toolWindow?.show()
-    }
-    
-    fun appendMessage(message: String) {
-        ApplicationManager.getApplication().invokeLater {
-            val toolWindowManager = ToolWindowManager.getInstance(project)
-            val toolWindow = toolWindowManager.getToolWindow("Code Cleanup")
-            val content = toolWindow?.contentManager?.selectedContent
-            val panel = content?.component as? CodeCleanupToolWindowPanel
-            panel?.appendMessage(message)
-        }
-    }
-    
-    fun clearMessages() {
-        ApplicationManager.getApplication().invokeLater {
-            val toolWindowManager = ToolWindowManager.getInstance(project)
-            val toolWindow = toolWindowManager.getToolWindow("Code Cleanup")
-            val content = toolWindow?.contentManager?.selectedContent
-            val panel = content?.component as? CodeCleanupToolWindowPanel
-            panel?.clearMessages()
-        }
-    }
+class CodeCleanupToolWindowService : StartupActivity.Background {
     
     companion object {
-        fun getInstance(project: Project): CodeCleanupToolWindowService {
-            return project.getService(CodeCleanupToolWindowService::class.java)
+        private const val TOOL_WINDOW_ID = "Code Cleanup"
+    }
+    
+    override fun runActivity(project: Project) {
+        // Register tool window on EDT
+        ApplicationManager.getApplication().invokeLater {
+            val toolWindowManager = ToolWindowManager.getInstance(project)
+            
+            // Register the tool window programmatically
+            val toolWindow = toolWindowManager.registerToolWindow(
+                TOOL_WINDOW_ID,
+                true,
+                ToolWindowAnchor.BOTTOM
+            )
+            
+            // Set tool window properties
+            toolWindow.setIcon(AllIcons.Actions.Refresh)
+            
+            // Set up the tool window content
+            setupToolWindowContent(project, toolWindow)
         }
+    }
+    
+    private fun setupToolWindowContent(project: Project, toolWindow: ToolWindow) {
+        val toolWindowPanel = CodeCleanupToolWindowPanel(project)
+        val contentFactory = ContentFactory.getInstance()
+        val content = contentFactory.createContent(toolWindowPanel, "", false)
+        toolWindow.contentManager.addContent(content)
     }
 } 
