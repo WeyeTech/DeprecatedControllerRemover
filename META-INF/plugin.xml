@@ -1,0 +1,206 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+  <idea-version since-build="242" until-build="252.*" />
+  <change-notes><![CDATA[<h3>Added</h3>
+
+<ul><li>Initial scaffold created from <a href="https://github.com/JetBrains/intellij-platform-plugin-template">IntelliJ Platform Plugin Template</a></li></ul>]]></change-notes>
+  <version>0.0.1</version>
+  <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+  <id>com.wheelseye.deprecatedcontrollerremover</id>
+  <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
+  <name>Deprecated Controller Remover</name>
+  <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+  <vendor email="saurabh.gautam@wheelseye.com" url="https://www.wheelseye.com">WheelsEye</vendor>
+  <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+  <description><![CDATA[<p><strong>Deprecated Controller Remover</strong> is an IntelliJ plugin that intelligently analyzes your Java/Spring codebase to identify and safely remove deprecated controller methods and unused code elements.</p>
+
+<p>This plugin helps maintain clean, efficient codebases by:</p>
+<ul><li><strong>Detecting deprecated controller methods</strong> that are no longer in use</li><li><strong>Removing unused final private fields</strong> to reduce memory footprint</li><li><strong>Cleaning up unused imports</strong> to improve code readability</li><li><strong>Providing detailed analysis reports</strong> of all cleanup operations</li><li><strong>Ensuring safe removal</strong> with comprehensive usage analysis</li></ul>
+
+<h2>Key Features</h2>
+
+<h3>🎯 <strong>Deprecated Controller Remover</strong></h3>
+<ul><li>Identifies deprecated methods in Spring controllers with <code>@Controller</code> and <code>@RestController</code> annotations</li><li>Analyzes usage patterns across the entire project using PSI tree traversal</li><li>Safely removes unused deprecated methods from controllers</li><li>Provides detailed reporting of what was removed</li></ul>
+
+<h3>🧹 <strong>Code Cleanup Service</strong></h3>
+<ul><li><strong>Unused Field Removal</strong>: Automatically removes unused final private fields</li><li><strong>Import Optimization</strong>: Cleans up unused import statements</li><li><strong>Smart Analysis</strong>: Uses PSI tree traversal for accurate usage detection</li><li><strong>Safe Operations</strong>: Comprehensive validation before any code removal</li></ul>
+
+<h3>📊 <strong>Detailed Reporting</strong></h3>
+<ul><li>Real-time progress updates during cleanup operations</li><li>Summary reports showing exactly what was removed</li><li>File-by-file breakdown of cleanup statistics</li><li>User confirmation dialogs for safety</li></ul>
+
+<h3>🛡️ <strong>Safety First</strong></h3>
+<ul><li>Comprehensive usage analysis before removal</li><li>Respects framework annotations and dependencies</li><li>Preserves code that might be used by reflection or external tools</li><li>Validates method usage across the entire project</li></ul>
+
+<h2>Installation</h2>
+
+<h3>From Source (Recommended for Development)</h3>
+<ol><li>Clone the repository: <code>git clone https://github.com/WeyeTech/DeprecatedControllerRemover.git</code></li><li>Build the plugin: <code>./gradlew buildPlugin</code></li><li>Install the generated <code>.jar</code> file from <code>build/distributions/</code> in IntelliJ IDEA</li><li>Restart your IDE</li></ol>
+
+<h3>From JetBrains Marketplace (Coming Soon)</h3>
+<ol><li>Open IntelliJ IDEA</li><li>Go to <strong>Settings/Preferences &gt; Plugins</strong></li><li>Search for &quot;Deprecated Controller Remover&quot;</li><li>Click <strong>Install</strong> and restart your IDE</li></ol>
+
+<h2>Usage</h2>
+
+<h3>Deprecated Controller Remover</h3>
+<ol><li>Open your Java/Spring project in IntelliJ IDEA</li><li>Go to <strong>Tools &gt; Deprecated Controller Remover</strong></li><li>Review the analysis results in the dialog</li><li>Confirm the cleanup operation</li></ol>
+
+<h3>Code Cleanup</h3>
+<ol><li>Mark files for cleanup by adding <code>//Controller Cleaner</code> comment at the top of Java files</li><li>Go to <strong>Tools &gt; Clean Marked Files</strong></li><li>Review the analysis results showing unused imports, fields, and empty classes</li><li>Confirm the cleanup operation</li></ol>
+
+<h3>Tool Windows</h3>
+<ul><li>Both tool windows appear as buttons in the bottom tool window area</li><li>Click on either button to open the respective console interface</li><li>Both windows provide real-time logging and progress updates</li><li>Operations can be run independently or simultaneously</li></ul>
+
+<h2>Configuration</h2>
+
+<p>The plugin works out-of-the-box with sensible defaults:</p>
+
+<ul><li><strong>File Marking</strong>: Add <code>//Controller Cleaner</code> to Java files you want to clean up</li><li><strong>Analysis Scope</strong>: Automatically analyzes the entire project</li><li><strong>Safety Checks</strong>: Comprehensive validation before removal</li><li><strong>Multiple Passes</strong>: Up to 3 cleanup passes to catch newly unused elements</li><li><strong>Progress Reporting</strong>: Detailed progress indicators and logging</li></ul>
+
+<h2>Supported Languages &amp; Frameworks</h2>
+
+<ul><li><strong>Java</strong>: Full support for Java projects with comprehensive PSI analysis</li><li><strong>Spring Framework</strong>: Specialized analysis for Spring controllers and annotations</li><li><strong>Maven/Gradle</strong>: Works with both build systems</li><li><strong>Kotlin</strong>: Basic support (coming in future versions)</li></ul>
+
+<h2>Development</h2>
+
+<p>This plugin is built using the IntelliJ Platform SDK and follows best practices for plugin development.</p>
+
+<h3>Prerequisites</h3>
+<ul><li>IntelliJ IDEA 2023.1 or later</li><li>Java 17 or later</li><li>Gradle 8.0 or later</li></ul>
+
+<h3>Building from Source</h3>
+
+<pre><code class="language-bash"># Clone the repository
+git clone https://github.com/WeyeTech/DeprecatedControllerRemover.git
+
+# Navigate to the project directory
+cd DeprecatedControllerRemover
+
+# Build the plugin
+./gradlew buildPlugin
+
+# Run the plugin in a sandbox IDE
+./gradlew runIde
+
+# Run tests
+./gradlew test
+</code></pre>
+
+<h3>Project Structure</h3>
+
+<pre><code>src/main/kotlin/
+└── com/wheelseye/
+    ├── codecleanup/
+    │   ├── action/
+    │   │   └── CodeCleanupAction.kt            # Code cleanup UI actions
+    │   ├── service/
+    │   │   └── CodeCleanupService.kt           # Code cleanup logic (imports, fields, empty classes)
+    │   └── toolWindow/
+    │       ├── CodeCleanupToolWindowFactory.kt # Code cleanup tool window factory
+    │       ├── CodeCleanupToolWindowPanel.kt   # Code cleanup tool window UI
+    │       └── CodeCleanupToolWindowService.kt # Code cleanup tool window service
+    └── deprecatedcontrollerremover/
+        ├── action/
+        │   └── DeprecatedControllerRemoverAction.kt      # Deprecated controller remover UI actions
+        ├── service/
+        │   └── DeprecatedControllerRemoverService.kt     # Deprecated controller remover logic (deprecated methods)
+        └── toolWindow/
+            ├── DeprecatedControllerRemoverToolWindowFactory.kt # Deprecated controller remover tool window factory
+            ├── DeprecatedControllerRemoverToolWindowPanel.kt   # Deprecated controller remover tool window UI
+            └── DeprecatedControllerRemoverToolWindowService.kt # Deprecated controller remover tool window service
+</code></pre>
+
+<h2>How It Works</h2>
+
+<h3>Deprecated Controller Remover Engine</h3>
+
+<p>The deprecated controller remover uses IntelliJ's PSI (Program Structure Interface) to analyze Spring controllers:</p>
+
+<ol><li><strong>Controller Detection</strong>: Identifies classes with <code>@Controller</code> or <code>@RestController</code> annotations</li><li><strong>Deprecated Method Analysis</strong>: Finds methods marked with <code>@Deprecated</code> annotation</li><li><strong>Usage Analysis</strong>: Traverses the PSI tree to find references using ReferencesSearch</li><li><strong>Safety Validation</strong>: Ensures deprecated methods aren't used by active code</li><li><strong>Safe Removal</strong>: Deletes unused deprecated methods with user confirmation</li></ol>
+
+<h3>Code Cleanup Engine</h3>
+
+<p>The code cleanup analyzes files marked with <code>//Controller Cleaner</code>:</p>
+
+<ol><li><strong>File Discovery</strong>: Scans for Java files with the cleanup marker</li><li><strong>Import Analysis</strong>: Identifies unused import statements (excluding java.lang.*)</li><li><strong>Field Analysis</strong>: Finds unused final private fields (excluding annotated fields)</li><li><strong>Class Analysis</strong>: Identifies empty classes with no methods, fields, or nested classes</li><li><strong>Multi-pass Cleanup</strong>: Runs up to 3 passes to catch newly unused elements</li><li><strong>Safe Removal</strong>: Deletes unused elements with comprehensive error handling</li></ol>
+
+
+
+<h2>Contributing</h2>
+
+<p>We welcome contributions! Please see our <a href="CONTRIBUTING.md">Contributing Guidelines</a> for details.</p>
+
+<h3>Development Setup</h3>
+
+<ol><li>Fork the repository</li><li>Create a feature branch: <code>git checkout -b feature/amazing-feature</code></li><li>Make your changes and add tests</li><li>Run the test suite: <code>./gradlew test</code></li><li>Commit your changes: <code>git commit -m 'Add amazing feature'</code></li><li>Push to the branch: <code>git push origin feature/amazing-feature</code></li><li>Open a Pull Request</li></ol>
+
+<h3>Testing</h3>
+
+<p>The plugin includes comprehensive tests:</p>
+
+<pre><code class="language-bash"># Run all tests
+./gradlew test
+
+# Run specific test categories
+./gradlew test --tests &quot;*DeprecatedControllerRemover*&quot;
+./gradlew test --tests &quot;*CodeCleanup*&quot;
+
+# Run with coverage
+./gradlew test jacocoTestReport
+</code></pre>
+
+<h2>Troubleshooting</h2>
+
+<h3>Common Issues</h3>
+
+<p><strong>Plugin not detecting files</strong></p>
+<ul><li>Ensure your project is properly indexed</li><li>Check that files are within the project scope</li><li>Verify Java SDK is correctly configured</li><li>Make sure the Java plugin is enabled</li></ul>
+
+<p><strong>False positives</strong></p>
+<ul><li>Review the safety settings</li><li>Check for framework annotations</li><li>Verify reflection usage patterns</li><li>Ensure all dependencies are properly resolved</li></ul>
+
+<p><strong>Performance issues</strong></p>
+<ul><li>Use module-specific analysis for large projects</li><li>Configure appropriate exclusion patterns</li><li>Consider running cleanup during off-peak hours</li><li>Check available memory and system resources</li></ul>
+
+<h3>Getting Help</h3>
+
+<p>If you encounter issues:</p>
+
+<ol><li>Check the <a href="https://github.com/WeyeTech/DeprecatedControllerRemover/issues">GitHub Issues</a> for known problems</li><li>Review the <a href="https://github.com/WeyeTech/DeprecatedControllerRemover/wiki">Wiki</a> for detailed guides</li><li>Join the <a href="https://github.com/WeyeTech/DeprecatedControllerRemover/discussions">Discussions</a> for community support</li></ol>
+
+<h2>License</h2>
+
+<p>This project is licensed under the MIT License - see the <a href="LICENSE">LICENSE</a> file for details.</p>
+
+<h2>Support</h2>
+
+<ul><li><strong>Issues</strong>: Report bugs and request features on <a href="https://github.com/WeyeTech/DeprecatedControllerRemover/issues">GitHub Issues</a></li><li><strong>Discussions</strong>: Join the conversation on <a href="https://github.com/WeyeTech/DeprecatedControllerRemover/discussions">GitHub Discussions</a></li><li><strong>Documentation</strong>: Check our <a href="https://github.com/WeyeTech/DeprecatedControllerRemover/wiki">Wiki</a> for detailed guides</li></ul>
+
+<h2>Roadmap</h2>
+
+<ul><li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled />Enhanced Spring controller detection with more annotation types</li><li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled />Kotlin language support</li><li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled />Custom cleanup rules configuration</li><li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled />Integration with CI/CD pipelines</li><li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled />Performance optimization for large codebases</li><li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled />IDE theme integration</li><li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled />Batch processing improvements</li><li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled />More detailed reporting and analytics</li></ul>
+
+<h2>Acknowledgments</h2>
+
+<ul><li>Built with the <a href="https://github.com/JetBrains/intellij-platform-plugin-template">IntelliJ Platform Plugin Template</a></li><li>Inspired by the need for automated code cleanup in large Java/Spring projects</li><li>Community feedback and contributions</li><li>JetBrains for the excellent IntelliJ Platform SDK</li></ul>
+
+<hr />]]></description>
+  <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+  <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.java</depends>
+  <actions>
+    <!-- Add your actions here -->
+            <action id="DeprecatedControllerRemover" class="com.wheelseye.deprecatedcontrollerremover.action.DeprecatedControllerRemoverAction" text="Deprecated Controller Remover" description="Remove unused deprecated methods from Spring controllers">
+      <add-to-group group-id="ToolsMenu" anchor="last" />
+    </action>
+    <!-- Disabled standalone code cleanup action -->
+    <!--
+        <action id="CodeCleanup" class="com.wheelseye.codecleanup.action.CodeCleanupAction" text="Clean Unused Code" description="Remove unused imports and final private fields">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+        -->
+  </actions>
+</idea-plugin>

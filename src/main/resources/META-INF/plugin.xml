@@ -1,11 +1,11 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-    <id>com.wheelseye.controllercleanup</id>
+    <id>com.wheelseye.deprecatedcontrollerremover</id>
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>Controller Cleanup</name>
+    <name>Deprecated Controller Remover</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor email="saurabh.gautam@wheelseye.com" url="https://www.wheelseye.com">WheelsEye</vendor>
@@ -33,9 +33,26 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
 
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Deprecated Controller Remover" 
+                   anchor="bottom" 
+                   secondary="false"
+                   icon="AllIcons.Actions.Clean" 
+                   factoryClass="com.wheelseye.deprecatedcontrollerremover.toolWindow.DeprecatedControllerRemoverToolWindowFactory"/>
+        <toolWindow id="Code Cleanup" 
+                   anchor="bottom" 
+                   secondary="true"
+                   icon="AllIcons.Actions.Clean" 
+                   factoryClass="com.wheelseye.codecleanup.toolWindow.CodeCleanupToolWindowFactory"/>
+    </extensions>
+
     <actions>
         <!-- Add your actions here -->
-        <action id="ControllerCleanup" class="com.wheelseye.controllercleanup.action.ControllerCleanupAction" text="Controller Cleanup" description="Remove unused deprecated methods from Spring controllers">
+        <action id="DeprecatedControllerRemover" class="com.wheelseye.deprecatedcontrollerremover.action.DeprecatedControllerRemoverAction" text="Deprecated Controller Remover" description="Remove unused deprecated methods from Spring controllers">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+        
+        <action id="CodeCleanup" class="com.wheelseye.codecleanup.action.CodeCleanupAction" text="Clean Marked Files" description="Remove unused imports and final private fields from files marked with '//Controller Cleaner'">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
         
