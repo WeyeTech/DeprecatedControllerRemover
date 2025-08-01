@@ -17,15 +17,15 @@
 - **Spring Controller Detection**: Automatic detection of `@Controller` and `@RestController` annotated classes
 - **Deprecated Method Analysis**: PSI-based analysis of deprecated methods with usage validation
 - **Import Cleanup**: Removal of unused import statements (excluding java.lang.*)
-- **Field Cleanup**: Removal of unused final private fields (excluding annotated fields)
-- **Empty Class Removal**: Detection and removal of classes with no methods, fields, or nested classes
+- **Field Cleanup**: Removal of any unused fields (excluding public, static, and annotated fields)
+- **Class Removal**: Detection and removal of classes with no methods (more aggressive approach)
 - **Project Structure**: Organized codebase with separate modules for controller and code cleanup
 - **Tool Window Services**: Dedicated services for managing tool window state and communication
 - **Action Integration**: Menu actions integrated into IntelliJ's Tools menu
 - **Plugin Configuration**: Proper plugin.xml configuration with tool window definitions
 
 ### Changed
-- **Plugin Name**: Maintained as "DeprecatedControllerRemover"
+- **Plugin Name**: Maintained as "Deprecated Controller Remover"
 - **Project Structure**: Reorganized from template structure to production-ready architecture
 - **Package Structure**: Implemented `com.wheelseye` package structure with separate cleanup modules
 - **Tool Window Layout**: Configured tool windows to appear on the same side with consistent icons

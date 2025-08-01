@@ -84,15 +84,15 @@ class CodeCleanupService(private val project: Project) {
         val totalImportsToRemove = unusedImports.values.sumOf { it.size }
         showMessage("Found $totalImportsToRemove unused imports")
 
-        indicator.text = "Analyzing unused final private fields..."
-        val unusedFields = findUnusedFinalPrivateFields(markedFiles)
+        indicator.text = "Analyzing unused fields..."
+        val unusedFields = findUnusedFields(markedFiles)
         val totalFieldsToRemove = unusedFields.values.sumOf { it.size }
-        showMessage("Found $totalFieldsToRemove unused final private fields")
+        showMessage("Found $totalFieldsToRemove unused fields")
 
-        indicator.text = "Analyzing empty classes..."
+        indicator.text = "Analyzing classes with no methods..."
         val emptyClasses = findEmptyClasses(markedFiles)
         val totalClassesToRemove = emptyClasses.values.sumOf { it.size }
-        showMessage("Found $totalClassesToRemove empty classes")
+        showMessage("Found $totalClassesToRemove classes with no methods")
 
         return CleanupAnalysis(
             filesToClean = markedFiles,
@@ -226,7 +226,7 @@ class CodeCleanupService(private val project: Project) {
         return visitor.foundUsage
     }
 
-    private fun findUnusedFinalPrivateFields(files: List<PsiJavaFile>): Map<PsiJavaFile, List<PsiField>> {
+    private fun findUnusedFields(files: List<PsiJavaFile>): Map<PsiJavaFile, List<PsiField>> {
         val unusedFields = mutableMapOf<PsiJavaFile, List<PsiField>>()
         
         files.forEach { file ->
@@ -234,7 +234,7 @@ class CodeCleanupService(private val project: Project) {
             
             file.classes.forEach { psiClass ->
                 psiClass.fields.forEach { field ->
-                    if (isUnusedFinalPrivateField(field)) {
+                    if (isUnusedField(field)) {
                         fileUnusedFields.add(field)
                     }
                 }
@@ -248,19 +248,24 @@ class CodeCleanupService(private val project: Project) {
         return unusedFields
     }
 
-    private fun isUnusedFinalPrivateField(field: PsiField): Boolean {
+    private fun isUnusedField(field: PsiField): Boolean {
         try {
             if (!field.isValid) {
                 return false
             }
             
-            // Check if field is final and private
-            if (!field.hasModifierProperty(PsiModifier.FINAL) || !field.hasModifierProperty(PsiModifier.PRIVATE)) {
+            // Skip fields with annotations (they might be used by frameworks)
+            if (field.modifierList?.annotations?.isNotEmpty() == true) {
                 return false
             }
             
-            // Skip fields with annotations (they might be used by frameworks)
-            if (field.modifierList?.annotations?.isNotEmpty() == true) {
+            // Skip public fields as they might be used externally
+            if (field.hasModifierProperty(PsiModifier.PUBLIC)) {
+                return false
+            }
+            
+            // Skip static fields as they might be used by reflection or external frameworks
+            if (field.hasModifierProperty(PsiModifier.STATIC)) {
                 return false
             }
             
@@ -311,11 +316,6 @@ class CodeCleanupService(private val project: Project) {
                 return false
             }
             
-            // Check if the class has any fields
-            if (psiClass.fields.size > 0) {
-                return false
-            }
-            
             // Check if the class has any nested classes
             if (psiClass.innerClasses.size > 0) {
                 return false
@@ -332,8 +332,8 @@ class CodeCleanupService(private val project: Project) {
         val message = buildString {
             appendLine("Found ${analysis.filesToClean.size} files marked for cleanup:")
             appendLine("• ${analysis.totalImportsToRemove} unused imports")
-            appendLine("• ${analysis.totalFieldsToRemove} unused final private fields")
-            appendLine("• ${analysis.totalClassesToRemove} empty classes")
+            appendLine("• ${analysis.totalFieldsToRemove} unused fields")
+            appendLine("• ${analysis.totalClassesToRemove} classes with no methods")
             appendLine()
             
             analysis.filesToClean.take(10).forEach { file ->
@@ -356,8 +356,8 @@ class CodeCleanupService(private val project: Project) {
         val message = buildString {
             appendLine("Found ${analysis.filesToClean.size} files marked for cleanup:")
             appendLine("• ${analysis.totalImportsToRemove} unused imports")
-            appendLine("• ${analysis.totalFieldsToRemove} unused final private fields")
-            appendLine("• ${analysis.totalClassesToRemove} empty classes")
+            appendLine("• ${analysis.totalFieldsToRemove} unused fields")
+            appendLine("• ${analysis.totalClassesToRemove} classes with no methods")
             appendLine()
             
             analysis.filesToClean.take(10).forEach { file ->

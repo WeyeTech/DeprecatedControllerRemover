@@ -8,7 +8,7 @@
 
 This plugin helps maintain clean, efficient codebases by:
 - **Detecting deprecated controller methods** that are no longer in use
-- **Removing unused final private fields** to reduce memory footprint
+- **Removing any unused fields** (not just final private) to reduce memory footprint
 - **Cleaning up unused imports** to improve code readability
 - **Removing empty classes** to streamline code structure
 - **Providing detailed analysis reports** of all cleanup operations
@@ -24,9 +24,9 @@ This plugin helps maintain clean, efficient codebases by:
 - **Tool Window**: Dedicated console interface for monitoring deprecated controller removal operations
 
 ### 🧹 **Code Cleanup Service**
-- **Unused Field Removal**: Automatically removes unused final private fields
+- **Unused Field Removal**: Automatically removes any unused fields (not just final private)
 - **Import Optimization**: Cleans up unused import statements
-- **Empty Class Removal**: Removes classes with no methods, fields, or nested classes
+- **Class Removal**: Removes classes with no methods (more aggressive approach)
 - **Smart Analysis**: Uses PSI tree traversal for accurate usage detection
 - **Safe Operations**: Comprehensive validation before any code removal
 - **File Marking**: Works with files marked with `//Controller Cleaner` comment
@@ -74,7 +74,7 @@ This plugin helps maintain clean, efficient codebases by:
 1. Mark files for cleanup by adding `//Controller Cleaner` comment at the top of Java files
 2. Go to **Tools > Clean Marked Files**
 3. The **Code Cleanup** tool window will appear at the bottom with a black console interface
-4. Review the analysis results showing unused imports, fields, and empty classes
+4. Review the analysis results showing unused imports, fields, and classes with no methods
 5. Confirm the cleanup operation
 
 ### Tool Windows
@@ -171,8 +171,8 @@ The code cleanup analyzes files marked with `//Controller Cleaner`:
 
 1. **File Discovery**: Scans for Java files with the cleanup marker
 2. **Import Analysis**: Identifies unused import statements (excluding java.lang.*)
-3. **Field Analysis**: Finds unused final private fields (excluding annotated fields)
-4. **Class Analysis**: Identifies empty classes with no methods, fields, or nested classes
+3. **Field Analysis**: Finds any unused fields (excluding public, static, and annotated fields)
+4. **Class Analysis**: Identifies classes with no methods (more aggressive approach)
 5. **Multi-pass Cleanup**: Runs up to 3 passes to catch newly unused elements
 6. **Safe Removal**: Deletes unused elements with comprehensive error handling
 
