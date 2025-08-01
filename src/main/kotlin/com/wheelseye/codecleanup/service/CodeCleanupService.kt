@@ -484,7 +484,10 @@ class CodeCleanupService(private val project: Project) {
                 passNumber++
             }
 
-            val finalMessage = "Successfully removed $totalRemovedImportsCount unused imports, $totalRemovedFieldsCount unused fields, and $totalRemovedClassesCount empty classes from ${analysis.filesToClean.size} files over $passNumber passes."
+            // Remove the "//Controller Cleaner" comments from all processed files
+            removeControllerCleanerComments(analysis.filesToClean)
+            
+            val finalMessage = "Successfully removed $totalRemovedImportsCount unused imports, $totalRemovedFieldsCount unused fields, and $totalRemovedClassesCount empty classes from ${analysis.filesToClean.size} files over $passNumber passes. Controller Cleaner comments have been removed."
             showMessage(finalMessage)
 
             // Show completion message on EDT
@@ -496,6 +499,24 @@ class CodeCleanupService(private val project: Project) {
             )
             }
         }
+    }
+
+    private fun removeControllerCleanerComments(files: List<PsiJavaFile>) {
+        showMessage("Removing Controller Cleaner comments from processed files...")
+        
+        files.forEach { file ->
+            try {
+                val firstElement = file.findElementAt(0)
+                if (firstElement?.text?.contains("//Controller Cleaner") == true) {
+                    firstElement.delete()
+                    showMessage("Removed Controller Cleaner comment from ${file.name}")
+                }
+            } catch (e: Exception) {
+                showMessage("Failed to remove Controller Cleaner comment from ${file.name}: ${e.message}")
+            }
+        }
+        
+        showMessage("Controller Cleaner comments removed from ${files.size} files")
     }
 
     private fun showMessage(message: String) {
