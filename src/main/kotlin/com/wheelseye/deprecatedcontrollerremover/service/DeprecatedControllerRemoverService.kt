@@ -316,7 +316,7 @@ class DeprecatedControllerRemoverService(private val project: Project) {
         WriteCommandAction.runWriteCommandAction(project) {
             var removedCount = 0
             val allMethods = analysis.unusedDeprecatedMethods + analysis.transitivelyUnusedMethods
-            val affectedFiles = mutableSetOf<PsiFile>()
+            val filesWithRemovedMethods = mutableSetOf<PsiFile>()
 
             allMethods.forEach { methodPointer ->
                 val method = methodPointer.element
@@ -331,7 +331,7 @@ class DeprecatedControllerRemoverService(private val project: Project) {
                     try {
                         val className = method.containingClass?.name ?: "Unknown"
                         // Track the file before removing the method
-                        method.containingFile?.let { affectedFiles.add(it) }
+                        method.containingFile?.let { filesWithRemovedMethods.add(it) }
                         method.delete()
                         removedCount++
                         indicator.text = "Removed: $className.${method.name}()"
@@ -342,10 +342,12 @@ class DeprecatedControllerRemoverService(private val project: Project) {
                 }
             }
 
-            // Mark affected files with Controller Cleaner comment
-            markFilesForCleanup(affectedFiles)
+            // Only mark files that actually had methods removed
+            if (filesWithRemovedMethods.isNotEmpty()) {
+                markFilesForCleanup(filesWithRemovedMethods)
+            }
 
-            val finalMessage = "Successfully removed $removedCount out of ${analysis.totalMethodsToRemove} methods and marked ${affectedFiles.size} files for cleanup."
+            val finalMessage = "Successfully removed $removedCount out of ${analysis.totalMethodsToRemove} methods and marked ${filesWithRemovedMethods.size} files for cleanup."
             showMessage(finalMessage)
 
             // Show completion message on EDT
