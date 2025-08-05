@@ -3,6 +3,8 @@
 > [!NOTE]
 > An IntelliJ IDEA plugin for automatically detecting and removing deprecated controller methods and cleaning up unused code.
 
+**Version**: 0.0.3
+
 <!-- Plugin description -->
 **Deprecated Controller Remover** is an IntelliJ plugin that intelligently analyzes your Java/Spring codebase to identify and safely remove deprecated controller methods and unused code elements.
 
@@ -60,6 +62,9 @@ This plugin helps maintain clean, efficient codebases by:
 2. Go to **Settings/Preferences > Plugins**
 3. Search for "Deprecated Controller Remover"
 4. Click **Install** and restart your IDE
+
+> [!NOTE]
+> Version 0.0.3 is currently available for development builds. Marketplace release coming soon.
 
 ## Usage
 
@@ -285,5 +290,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for a complete list of changes and version history.
+
+### Recent Changes (v0.0.3)
+- **Dual Tool Window System**: Separate tool windows for controller removal and code cleanup
+- **Enhanced Code Analysis**: Multi-pass cleanup with comprehensive PSI-based analysis
+- **Improved User Experience**: Real-time progress tracking and detailed logging
+- **Safety Features**: Comprehensive validation and user confirmation dialogs
+- **Spring Framework Integration**: Specialized analysis for Spring controllers
 
 ---

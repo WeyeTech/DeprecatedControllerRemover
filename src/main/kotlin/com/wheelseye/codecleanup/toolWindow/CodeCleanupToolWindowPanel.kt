@@ -56,8 +56,8 @@ class CodeCleanupToolWindowPanel(private val project: Project) : JPanel(BorderLa
             Features:
             • View cleanup progress and results
             • Monitor unused imports removal
-            • Track unused fields cleanup (any unused field, not just final private)
-            • Monitor class removal (classes with no methods)
+            • Track unused fields cleanup (including annotated fields)
+            • Monitor unused class removal (empty and non-empty, excluding REST controllers)
             
             Use the Clean Marked Files action from Tools menu to start cleanup.
         """.trimIndent()
