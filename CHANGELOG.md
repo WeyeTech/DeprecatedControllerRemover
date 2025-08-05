@@ -4,6 +4,24 @@
 
 ## [Unreleased]
 ### Added
+- Enhanced error handling and validation
+- Performance optimizations for large codebases
+- Improved user feedback and progress reporting
+
+## [0.0.3]
+### Added
+- **Enhanced Code Analysis**: Improved PSI-based analysis for more accurate detection
+- **Better Error Handling**: More robust error handling with detailed error messages
+- **Performance Improvements**: Optimized analysis for large codebases
+- **User Experience Enhancements**: Improved progress reporting and feedback
+
+### Changed
+- **Analysis Accuracy**: Enhanced detection of unused elements with better validation
+- **Tool Window Performance**: Improved responsiveness of tool windows
+- **Documentation**: Updated README with current version information
+
+## [0.0.2]
+### Added
 - **Dual Tool Window System**: Added separate tool windows for Deprecated Controller Remover and Code Cleanup operations
 - **Deprecated Controller Remover Tool Window**: Black console-style interface for monitoring deprecated controller removal operations
 - **Code Cleanup Tool Window**: Black console-style interface for monitoring general code cleanup operations

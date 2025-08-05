@@ -33,7 +33,8 @@ class CodeCleanupService(private val project: Project) {
         val filesToClean: List<PsiJavaFile>,
         val unusedImports: Map<PsiJavaFile, List<PsiImportStatement>>,
         val unusedFields: Map<PsiJavaFile, List<PsiField>>,
-        val emptyClasses: Map<PsiJavaFile, List<PsiClass>>,
+        val unusedEmptyClasses: Map<PsiJavaFile, List<PsiClass>>,
+        val unusedNonEmptyClasses: Map<PsiJavaFile, List<PsiClass>>,
         val totalImportsToRemove: Int,
         val totalFieldsToRemove: Int,
         val totalClassesToRemove: Int
@@ -76,7 +77,7 @@ class CodeCleanupService(private val project: Project) {
         showMessage("Found ${markedFiles.size} files marked for cleanup")
 
         if (markedFiles.isEmpty()) {
-            return CleanupAnalysis(emptyList(), emptyMap(), emptyMap(), emptyMap(), 0, 0, 0)
+            return CleanupAnalysis(emptyList(), emptyMap(), emptyMap(), emptyMap(), emptyMap(), 0, 0, 0)
         }
 
         indicator.text = "Analyzing unused imports..."
@@ -89,16 +90,24 @@ class CodeCleanupService(private val project: Project) {
         val totalFieldsToRemove = unusedFields.values.sumOf { it.size }
         showMessage("Found $totalFieldsToRemove unused fields")
 
-        indicator.text = "Analyzing classes with no methods..."
-        val emptyClasses = findEmptyClasses(markedFiles)
-        val totalClassesToRemove = emptyClasses.values.sumOf { it.size }
-        showMessage("Found $totalClassesToRemove classes with no methods")
+        indicator.text = "Analyzing unused empty classes..."
+        val unusedEmptyClasses = findUnusedEmptyClasses(markedFiles)
+        val totalEmptyClassesToRemove = unusedEmptyClasses.values.sumOf { it.size }
+        showMessage("Found $totalEmptyClassesToRemove unused empty classes")
+
+        indicator.text = "Analyzing unused non-empty classes..."
+        val unusedNonEmptyClasses = findUnusedNonEmptyClasses(markedFiles)
+        val totalNonEmptyClassesToRemove = unusedNonEmptyClasses.values.sumOf { it.size }
+        showMessage("Found $totalNonEmptyClassesToRemove unused non-empty classes")
+
+        val totalClassesToRemove = totalEmptyClassesToRemove + totalNonEmptyClassesToRemove
 
         return CleanupAnalysis(
             filesToClean = markedFiles,
             unusedImports = unusedImports,
             unusedFields = unusedFields,
-            emptyClasses = emptyClasses,
+            unusedEmptyClasses = unusedEmptyClasses,
+            unusedNonEmptyClasses = unusedNonEmptyClasses,
             totalImportsToRemove = totalImportsToRemove,
             totalFieldsToRemove = totalFieldsToRemove,
             totalClassesToRemove = totalClassesToRemove
@@ -254,11 +263,6 @@ class CodeCleanupService(private val project: Project) {
                 return false
             }
             
-            // Skip fields with annotations (they might be used by frameworks)
-            if (field.modifierList?.annotations?.isNotEmpty() == true) {
-                return false
-            }
-            
             // Skip public fields as they might be used externally
             if (field.hasModifierProperty(PsiModifier.PUBLIC)) {
                 return false
@@ -285,27 +289,47 @@ class CodeCleanupService(private val project: Project) {
         }
     }
 
-    private fun findEmptyClasses(files: List<PsiJavaFile>): Map<PsiJavaFile, List<PsiClass>> {
-        val emptyClasses = mutableMapOf<PsiJavaFile, List<PsiClass>>()
+    private fun findUnusedEmptyClasses(files: List<PsiJavaFile>): Map<PsiJavaFile, List<PsiClass>> {
+        val unusedEmptyClasses = mutableMapOf<PsiJavaFile, List<PsiClass>>()
         
         files.forEach { file ->
-            val fileEmptyClasses = mutableListOf<PsiClass>()
+            val fileUnusedEmptyClasses = mutableListOf<PsiClass>()
             
             file.classes.forEach { psiClass ->
-                if (isClassEmpty(psiClass)) {
-                    fileEmptyClasses.add(psiClass)
+                if (isClassUnusedAndEmpty(psiClass)) {
+                    fileUnusedEmptyClasses.add(psiClass)
                 }
             }
             
-            if (fileEmptyClasses.isNotEmpty()) {
-                emptyClasses[file] = fileEmptyClasses
+            if (fileUnusedEmptyClasses.isNotEmpty()) {
+                unusedEmptyClasses[file] = fileUnusedEmptyClasses
             }
         }
         
-        return emptyClasses
+        return unusedEmptyClasses
     }
 
-    private fun isClassEmpty(psiClass: PsiClass): Boolean {
+    private fun findUnusedNonEmptyClasses(files: List<PsiJavaFile>): Map<PsiJavaFile, List<PsiClass>> {
+        val unusedNonEmptyClasses = mutableMapOf<PsiJavaFile, List<PsiClass>>()
+        
+        files.forEach { file ->
+            val fileUnusedNonEmptyClasses = mutableListOf<PsiClass>()
+            
+            file.classes.forEach { psiClass ->
+                if (isClassUnused(psiClass)) {
+                    fileUnusedNonEmptyClasses.add(psiClass)
+                }
+            }
+            
+            if (fileUnusedNonEmptyClasses.isNotEmpty()) {
+                unusedNonEmptyClasses[file] = fileUnusedNonEmptyClasses
+            }
+        }
+        
+        return unusedNonEmptyClasses
+    }
+
+    private fun isClassUnusedAndEmpty(psiClass: PsiClass): Boolean {
         try {
             if (!psiClass.isValid) {
                 return false
@@ -321,11 +345,69 @@ class CodeCleanupService(private val project: Project) {
                 return false
             }
             
-            return true
+            // Check if the class is unused
+            val scope = GlobalSearchScope.projectScope(project)
+            val references = ReferencesSearch.search(psiClass, scope).findAll()
+            
+            // Filter out references that are within the same class (self-references)
+            val externalReferences = references.filter { ref ->
+                val element = ref.element
+                val containingClass = PsiTreeUtil.getParentOfType(element, PsiClass::class.java)
+                containingClass != psiClass
+            }
+            
+            return externalReferences.isEmpty()
         } catch (e: Exception) {
             showMessage("Error checking class ${psiClass.name}: ${e.message}")
             return false
         }
+    }
+
+    private fun isClassUnused(psiClass: PsiClass): Boolean {
+        try {
+            if (!psiClass.isValid) {
+                return false
+            }
+            
+            // Skip REST controller classes (they should be preserved even if unused)
+            if (isRestControllerClass(psiClass)) {
+                return false
+            }
+            
+            // Check if the class is unused
+            val scope = GlobalSearchScope.projectScope(project)
+            val references = ReferencesSearch.search(psiClass, scope).findAll()
+            
+            // Filter out references that are within the same class (self-references)
+            val externalReferences = references.filter { ref ->
+                val element = ref.element
+                val containingClass = PsiTreeUtil.getParentOfType(element, PsiClass::class.java)
+                containingClass != psiClass
+            }
+            
+            return externalReferences.isEmpty()
+        } catch (e: Exception) {
+            showMessage("Error checking class ${psiClass.name}: ${e.message}")
+            return false
+        }
+    }
+
+    private fun isRestControllerClass(psiClass: PsiClass): Boolean {
+        // Check for @Controller annotation
+        if (psiClass.modifierList?.hasAnnotation("org.springframework.stereotype.Controller") == true ||
+            psiClass.modifierList?.hasAnnotation("Controller") == true) {
+            return true
+        }
+        // Check for @RestController annotation
+        if (psiClass.modifierList?.hasAnnotation("org.springframework.web.bind.annotation.RestController") == true ||
+            psiClass.modifierList?.hasAnnotation("RestController") == true) {
+            return true
+        }
+        // Check if class name contains "Controller"
+        if (psiClass.name?.contains("Controller") == true) {
+            return true
+        }
+        return false
     }
 
     private fun showSummary(analysis: CleanupAnalysis) {
@@ -333,14 +415,16 @@ class CodeCleanupService(private val project: Project) {
             appendLine("Found ${analysis.filesToClean.size} files marked for cleanup:")
             appendLine("• ${analysis.totalImportsToRemove} unused imports")
             appendLine("• ${analysis.totalFieldsToRemove} unused fields")
-            appendLine("• ${analysis.totalClassesToRemove} classes with no methods")
+            appendLine("• ${analysis.unusedEmptyClasses.values.sumOf { it.size }} unused empty classes")
+            appendLine("• ${analysis.unusedNonEmptyClasses.values.sumOf { it.size }} unused non-empty classes")
             appendLine()
             
             analysis.filesToClean.take(10).forEach { file ->
                 val importsCount = analysis.unusedImports[file]?.size ?: 0
                 val fieldsCount = analysis.unusedFields[file]?.size ?: 0
-                val classesCount = analysis.emptyClasses[file]?.size ?: 0
-                appendLine("• ${file.name}: $importsCount imports, $fieldsCount fields, $classesCount empty classes")
+                val emptyClassesCount = analysis.unusedEmptyClasses[file]?.size ?: 0
+                val nonEmptyClassesCount = analysis.unusedNonEmptyClasses[file]?.size ?: 0
+                appendLine("• ${file.name}: $importsCount imports, $fieldsCount fields, $emptyClassesCount empty classes, $nonEmptyClassesCount non-empty classes")
             }
             if (analysis.filesToClean.size > 10) {
                 appendLine("... and ${analysis.filesToClean.size - 10} more files")
@@ -357,14 +441,16 @@ class CodeCleanupService(private val project: Project) {
             appendLine("Found ${analysis.filesToClean.size} files marked for cleanup:")
             appendLine("• ${analysis.totalImportsToRemove} unused imports")
             appendLine("• ${analysis.totalFieldsToRemove} unused fields")
-            appendLine("• ${analysis.totalClassesToRemove} classes with no methods")
+            appendLine("• ${analysis.unusedEmptyClasses.values.sumOf { it.size }} unused empty classes")
+            appendLine("• ${analysis.unusedNonEmptyClasses.values.sumOf { it.size }} unused non-empty classes")
             appendLine()
             
             analysis.filesToClean.take(10).forEach { file ->
                 val importsCount = analysis.unusedImports[file]?.size ?: 0
                 val fieldsCount = analysis.unusedFields[file]?.size ?: 0
-                val classesCount = analysis.emptyClasses[file]?.size ?: 0
-                appendLine("• ${file.name}: $importsCount imports, $fieldsCount fields, $classesCount empty classes")
+                val emptyClassesCount = analysis.unusedEmptyClasses[file]?.size ?: 0
+                val nonEmptyClassesCount = analysis.unusedNonEmptyClasses[file]?.size ?: 0
+                appendLine("• ${file.name}: $importsCount imports, $fieldsCount fields, $emptyClassesCount empty classes, $nonEmptyClassesCount non-empty classes")
             }
             if (analysis.filesToClean.size > 10) {
                 appendLine("... and ${analysis.filesToClean.size - 10} more files")
@@ -452,19 +538,36 @@ class CodeCleanupService(private val project: Project) {
                     }
                 }
 
-                // Remove empty classes
-                currentAnalysis.emptyClasses.forEach { (file, classes) ->
+                // Remove unused empty classes
+                currentAnalysis.unusedEmptyClasses.forEach { (file, classes) ->
                     classes.forEach { psiClass ->
                         try {
                             val className = psiClass.name ?: "Unknown"
                             psiClass.delete()
                             passRemovedClassesCount++
-                            indicator.text = "Pass $passNumber - Removed empty class: $className from ${file.name}"
-                            showMessage("Pass $passNumber - Removed empty class: $className from ${file.name}")
+                            indicator.text = "Pass $passNumber - Removed unused empty class: $className from ${file.name}"
+                            showMessage("Pass $passNumber - Removed unused empty class: $className from ${file.name}")
                             hasChanges = true
                         } catch (e: Exception) {
                             val className = psiClass.name ?: "Unknown"
-                            showMessage("Failed to remove empty class $className from ${file.name}: ${e.message}")
+                            showMessage("Failed to remove unused empty class $className from ${file.name}: ${e.message}")
+                        }
+                    }
+                }
+
+                // Remove unused non-empty classes
+                currentAnalysis.unusedNonEmptyClasses.forEach { (file, classes) ->
+                    classes.forEach { psiClass ->
+                        try {
+                            val className = psiClass.name ?: "Unknown"
+                            psiClass.delete()
+                            passRemovedClassesCount++
+                            indicator.text = "Pass $passNumber - Removed unused non-empty class: $className from ${file.name}"
+                            showMessage("Pass $passNumber - Removed unused non-empty class: $className from ${file.name}")
+                            hasChanges = true
+                        } catch (e: Exception) {
+                            val className = psiClass.name ?: "Unknown"
+                            showMessage("Failed to remove unused non-empty class $className from ${file.name}: ${e.message}")
                         }
                     }
                 }
@@ -473,7 +576,7 @@ class CodeCleanupService(private val project: Project) {
                 totalRemovedFieldsCount += passRemovedFieldsCount
                 totalRemovedClassesCount += passRemovedClassesCount
 
-                showMessage("Pass $passNumber complete: removed $passRemovedImportsCount unused imports, $passRemovedFieldsCount unused fields, and $passRemovedClassesCount empty classes")
+                showMessage("Pass $passNumber complete: removed $passRemovedImportsCount unused imports, $passRemovedFieldsCount unused fields, and $passRemovedClassesCount unused classes")
 
                 // If no changes were made in this pass, we can stop early
                 if (!hasChanges) {
@@ -487,7 +590,7 @@ class CodeCleanupService(private val project: Project) {
             // Remove the "//Controller Cleaner" comments from all processed files
             removeControllerCleanerComments(analysis.filesToClean)
             
-            val finalMessage = "Successfully removed $totalRemovedImportsCount unused imports, $totalRemovedFieldsCount unused fields, and $totalRemovedClassesCount empty classes from ${analysis.filesToClean.size} files over $passNumber passes. Controller Cleaner comments have been removed."
+            val finalMessage = "Successfully removed $totalRemovedImportsCount unused imports, $totalRemovedFieldsCount unused fields, and $totalRemovedClassesCount unused classes from ${analysis.filesToClean.size} files over $passNumber passes. Controller Cleaner comments have been removed."
             showMessage(finalMessage)
 
             // Show completion message on EDT
