@@ -263,26 +263,16 @@ class CodeCleanupService(private val project: Project) {
                 return false
             }
             
-            // Skip public fields as they might be used externally
-            if (field.hasModifierProperty(PsiModifier.PUBLIC)) {
-                return false
-            }
-            
-            // Skip static fields as they might be used by reflection or external frameworks
-            if (field.hasModifierProperty(PsiModifier.STATIC)) {
-                return false
+            // Check if the field's containing class has @Getter or @Setter annotations
+            val containingClass = PsiTreeUtil.getParentOfType(field, PsiClass::class.java)
+            if (containingClass != null && hasGetterOrSetterAnnotation(containingClass)) {
+                return false // Don't remove fields from classes with @Getter or @Setter
             }
             
             val scope = GlobalSearchScope.projectScope(project)
             val references = ReferencesSearch.search(field, scope).findAll()
             
-            // Filter out references that are not the field declaration itself
-            val externalReferences = references.filter { ref ->
-                val element = ref.element
-                element != field.nameIdentifier
-            }
-            
-            return externalReferences.isEmpty()
+            return references.isEmpty()
         } catch (e: Exception) {
             showMessage("Error checking field ${field.name}: ${e.message}")
             return false
@@ -410,6 +400,30 @@ class CodeCleanupService(private val project: Project) {
         return false
     }
 
+    private fun hasGetterOrSetterAnnotation(psiClass: PsiClass): Boolean {
+        val modifierList = psiClass.modifierList ?: return false
+        
+        // Check for @Data annotation (Lombok) - includes @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
+        if (modifierList.hasAnnotation("lombok.Data") || 
+            modifierList.hasAnnotation("Data")) {
+            return true
+        }
+        
+        // Check for @Getter annotation (Lombok)
+        if (modifierList.hasAnnotation("lombok.Getter") || 
+            modifierList.hasAnnotation("Getter")) {
+            return true
+        }
+        
+        // Check for @Setter annotation (Lombok)
+        if (modifierList.hasAnnotation("lombok.Setter") || 
+            modifierList.hasAnnotation("Setter")) {
+            return true
+        }
+        
+        return false
+    }
+
     private fun showSummary(analysis: CleanupAnalysis) {
         val message = buildString {
             appendLine("Found ${analysis.filesToClean.size} files marked for cleanup:")
@@ -486,7 +500,7 @@ class CodeCleanupService(private val project: Project) {
             var totalRemovedFieldsCount = 0
             var totalRemovedClassesCount = 0
             var passNumber = 1
-            val maxPasses = 3
+            val maxPasses = 4
 
             // Run multiple passes to catch elements that become unused after other elements are removed
             while (passNumber <= maxPasses) {
@@ -538,37 +552,46 @@ class CodeCleanupService(private val project: Project) {
                     }
                 }
 
-                // Remove unused empty classes
-                currentAnalysis.unusedEmptyClasses.forEach { (file, classes) ->
-                    classes.forEach { psiClass ->
-                        try {
-                            val className = psiClass.name ?: "Unknown"
-                            psiClass.delete()
-                            passRemovedClassesCount++
-                            indicator.text = "Pass $passNumber - Removed unused empty class: $className from ${file.name}"
-                            showMessage("Pass $passNumber - Removed unused empty class: $className from ${file.name}")
-                            hasChanges = true
-                        } catch (e: Exception) {
-                            val className = psiClass.name ?: "Unknown"
-                            showMessage("Failed to remove unused empty class $className from ${file.name}: ${e.message}")
+                // Remove unused empty classes (only on passes 2 and 3)
+                if (passNumber > 1) {
+                    currentAnalysis.unusedEmptyClasses.forEach { (file, classes) ->
+                        classes.forEach { psiClass ->
+                            try {
+                                val className = psiClass.name ?: "Unknown"
+                                psiClass.delete()
+                                passRemovedClassesCount++
+                                indicator.text = "Pass $passNumber - Removed unused empty class: $className from ${file.name}"
+                                showMessage("Pass $passNumber - Removed unused empty class: $className from ${file.name}")
+                                hasChanges = true
+                            } catch (e: Exception) {
+                                val className = psiClass.name ?: "Unknown"
+                                showMessage("Failed to remove unused empty class $className from ${file.name}: ${e.message}")
+                            }
                         }
                     }
-                }
 
-                // Remove unused non-empty classes
-                currentAnalysis.unusedNonEmptyClasses.forEach { (file, classes) ->
-                    classes.forEach { psiClass ->
-                        try {
-                            val className = psiClass.name ?: "Unknown"
-                            psiClass.delete()
-                            passRemovedClassesCount++
-                            indicator.text = "Pass $passNumber - Removed unused non-empty class: $className from ${file.name}"
-                            showMessage("Pass $passNumber - Removed unused non-empty class: $className from ${file.name}")
-                            hasChanges = true
-                        } catch (e: Exception) {
-                            val className = psiClass.name ?: "Unknown"
-                            showMessage("Failed to remove unused non-empty class $className from ${file.name}: ${e.message}")
+                    // Remove unused non-empty classes (only on passes 2 and 3)
+                    currentAnalysis.unusedNonEmptyClasses.forEach { (file, classes) ->
+                        classes.forEach { psiClass ->
+                            try {
+                                val className = psiClass.name ?: "Unknown"
+                                psiClass.delete()
+                                passRemovedClassesCount++
+                                indicator.text = "Pass $passNumber - Removed unused non-empty class: $className from ${file.name}"
+                                showMessage("Pass $passNumber - Removed unused non-empty class: $className from ${file.name}")
+                                hasChanges = true
+                            } catch (e: Exception) {
+                                val className = psiClass.name ?: "Unknown"
+                                showMessage("Failed to remove unused non-empty class $className from ${file.name}: ${e.message}")
+                            }
                         }
+                    }
+                } else {
+                    // On pass 1, just log what classes would be removed
+                    val totalEmptyClasses = currentAnalysis.unusedEmptyClasses.values.sumOf { it.size }
+                    val totalNonEmptyClasses = currentAnalysis.unusedNonEmptyClasses.values.sumOf { it.size }
+                    if (totalEmptyClasses > 0 || totalNonEmptyClasses > 0) {
+                        showMessage("Pass 1 - Found $totalEmptyClasses unused empty classes and $totalNonEmptyClasses unused non-empty classes (will be removed in subsequent passes)")
                     }
                 }
 
