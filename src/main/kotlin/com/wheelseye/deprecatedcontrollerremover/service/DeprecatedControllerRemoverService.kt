@@ -328,6 +328,20 @@ class DeprecatedControllerRemoverService(private val project: Project) {
                         return@forEach
                     }
                     
+                    // Safety check: don't modify files with @Entity annotations
+                    val containingFile = method.containingFile
+                    if (containingFile is PsiJavaFile) {
+                        val hasEntityAnnotation = containingFile.classes.any { psiClass ->
+                            psiClass.modifierList?.hasAnnotation("javax.persistence.Entity") == true ||
+                            psiClass.modifierList?.hasAnnotation("jakarta.persistence.Entity") == true ||
+                            psiClass.modifierList?.hasAnnotation("Entity") == true
+                        }
+                        if (hasEntityAnnotation) {
+                            showMessage("Skipping ${method.containingClass?.name}.${method.name}() - file contains @Entity annotation")
+                            return@forEach
+                        }
+                    }
+                    
                     try {
                         val className = method.containingClass?.name ?: "Unknown"
                         // Track the file before removing the method
