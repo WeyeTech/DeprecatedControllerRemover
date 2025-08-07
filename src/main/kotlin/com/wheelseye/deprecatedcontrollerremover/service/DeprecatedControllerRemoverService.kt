@@ -252,7 +252,7 @@ class DeprecatedControllerRemoverService(private val project: Project) {
             usageCount--
             usageCountMap[method] = usageCount
             
-            if (usageCount <= 0) {
+            if (i > 0 || usageCount == 0) {
                 if (method.containingClass?.isInterface == true) continue
                 if (method.findSuperMethods().isNotEmpty()) continue
 
